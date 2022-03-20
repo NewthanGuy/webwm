@@ -85,11 +85,10 @@ This should be a color, or nil for transparent background."
              (xcb:+request exwm--connection
                  (make-instance 'xcb:ChangeWindowAttributes
                                 :window exwm-systemtray--embedder-window
-                                :value-mask (logior xcb:CW:BackPixmap
-                                                    (if background-pixel
-                                                        xcb:CW:BackPixel 0))
-                                :background-pixmap
-                                xcb:BackPixmap:ParentRelative
+                                :value-mask (if background-pixel
+                                                xcb:CW:BackPixel
+                                              xcb:CW:BackPixmap)
+                                :background-pixmap xcb:BackPixmap:None
                                 :background-pixel background-pixel))
              ;; Unmap & map to take effect immediately.
              (xcb:+request exwm--connection
@@ -470,7 +469,7 @@ This should be a color, or nil for transparent background."
   ;; Create the embedder.
   (let ((id (xcb:generate-id exwm-systemtray--connection))
         (background-pixel (exwm--color->pixel exwm-systemtray-background-color))
-        frame parent depth y)
+        frame parent embedder-depth embedder-visual embedder-colormap y)
     (setq exwm-systemtray--embedder-window id)
     (if (exwm-workspace--minibuffer-own-frame-p)
         (setq frame exwm-workspace--minibuffer
@@ -487,15 +486,18 @@ This should be a color, or nil for transparent background."
                       3)
                  exwm-workspace--frame-y-offset
                  exwm-systemtray-height)))
-    (setq parent (string-to-number (frame-parameter frame 'window-id))
-          depth (slot-value (xcb:+request-unchecked+reply
-                                exwm-systemtray--connection
-                                (make-instance 'xcb:GetGeometry
-                                               :drawable parent))
-                            'depth))
+    ;; Use default depth, visual and colormap (from root window), instead of
+    ;; Emacs frame's.  See Section "Visual and background pixmap handling" in
+    ;; "System Tray Protocol Specification 0.3".
+    (let* ((vdc (exwm--get-visual-depth-colormap exwm-systemtray--connection
+                                                 exwm--root)))
+      (setq embedder-visual (car vdc))
+      (setq embedder-depth (cadr vdc))
+      (setq embedder-colormap (caddr vdc)))
+    (setq parent (string-to-number (frame-parameter frame 'window-id)))
     (xcb:+request exwm-systemtray--connection
         (make-instance 'xcb:CreateWindow
-                       :depth depth
+                       :depth embedder-depth
                        :wid id
                        :parent parent
                        :x 0
@@ -504,19 +506,28 @@ This should be a color, or nil for transparent background."
                        :height exwm-systemtray-height
                        :border-width 0
                        :class xcb:WindowClass:InputOutput
-                       :visual 0
-                       :value-mask (logior xcb:CW:BackPixmap
+                       :visual embedder-visual
+                       :colormap embedder-colormap
+                       :value-mask (logior xcb:CW:BorderPixel
                                            (if background-pixel
-                                               xcb:CW:BackPixel 0)
+                                               xcb:CW:BackPixel
+                                             xcb:CW:BackPixmap)
+                                           xcb:CW:Colormap
                                            xcb:CW:EventMask)
-                       :background-pixmap xcb:BackPixmap:ParentRelative
+                       :background-pixmap xcb:BackPixmap:None
                        :background-pixel background-pixel
+                       :border-pixel 0
                        :event-mask xcb:EventMask:SubstructureNotify))
     ;; Set _NET_WM_NAME.
     (xcb:+request exwm-systemtray--connection
         (make-instance 'xcb:ewmh:set-_NET_WM_NAME
                        :window id
-                       :data "EXWM: exwm-systemtray--embedder-window")))
+                       :data "EXWM: exwm-systemtray--embedder-window"))
+    ;; Set _NET_SYSTEM_TRAY_VISUAL.
+    (xcb:+request exwm-systemtray--connection
+        (make-instance 'xcb:xembed:set-_NET_SYSTEM_TRAY_VISUAL
+                       :window exwm-systemtray--selection-owner-window
+                       :data embedder-visual)))
   (xcb:flush exwm-systemtray--connection)
   ;; Attach event listeners.
   (xcb:+event exwm-systemtray--connection 'xcb:DestroyNotify
