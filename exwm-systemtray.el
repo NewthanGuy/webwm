@@ -88,7 +88,7 @@ This should be a color, or nil for transparent background."
                                 :value-mask (if background-pixel
                                                 xcb:CW:BackPixel
                                               xcb:CW:BackPixmap)
-                                :background-pixmap xcb:BackPixmap:None
+                                :background-pixmap xcb:BackPixmap:ParentRelative
                                 :background-pixel background-pixel))
              ;; Unmap & map to take effect immediately.
              (xcb:+request exwm--connection
@@ -489,12 +489,12 @@ This should be a color, or nil for transparent background."
     ;; Use default depth, visual and colormap (from root window), instead of
     ;; Emacs frame's.  See Section "Visual and background pixmap handling" in
     ;; "System Tray Protocol Specification 0.3".
+    (setq parent (string-to-number (frame-parameter frame 'window-id)))
     (let* ((vdc (exwm--get-visual-depth-colormap exwm-systemtray--connection
-                                                 exwm--root)))
+                                                 parent)))
       (setq embedder-visual (car vdc))
       (setq embedder-depth (cadr vdc))
       (setq embedder-colormap (caddr vdc)))
-    (setq parent (string-to-number (frame-parameter frame 'window-id)))
     (xcb:+request exwm-systemtray--connection
         (make-instance 'xcb:CreateWindow
                        :depth embedder-depth
@@ -514,7 +514,7 @@ This should be a color, or nil for transparent background."
                                              xcb:CW:BackPixmap)
                                            xcb:CW:Colormap
                                            xcb:CW:EventMask)
-                       :background-pixmap xcb:BackPixmap:None
+                       :background-pixmap xcb:BackPixmap:ParentRelative
                        :background-pixel background-pixel
                        :border-pixel 0
                        :event-mask xcb:EventMask:SubstructureNotify))
