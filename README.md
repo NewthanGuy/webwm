@@ -18,4 +18,4 @@ and the [user guide](https://github.com/ch11ng/exwm/wiki)
 for a detailed explanation of its usage.
 
 **Note**: If you install WebXWM from source, it's recommended to install
-KEBL also from source (otherwise install both from GNU ELPA).
+XEBL also from source (otherwise install both from GNU ELPA).
