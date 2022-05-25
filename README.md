@@ -1,7 +1,7 @@
 # Web X Window Manager
 
 WebXWM (Web X Window Manager) is a full-featured tiling X window manager
-for Emacs built on top of [XELB](https://github.com/ch11ng/xelb).
+for Emacs built on top of [EXWM](https://github.com/ch11ng/exwm).
 It features:
 + Fully keyboard-driven operations
 + Hybrid layout modes (tiling & stacking)
@@ -18,4 +18,4 @@ and the [user guide](https://github.com/ch11ng/exwm/wiki)
 for a detailed explanation of its usage.
 
 **Note**: If you install WebXWM from source, it's recommended to install
-XELB also from source (otherwise install both from GNU ELPA).
+KEBL also from source (otherwise install both from GNU ELPA).
