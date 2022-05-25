@@ -16,5 +16,5 @@ xset r rate 200 60
 #export QT_IM_MODULE=xim
 #export CLUTTER_IM_MODULE=xim
 
-# Finally start Emacs
-exec emacs
+# Finally start the browser
+exec midori
