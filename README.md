@@ -1,7 +1,7 @@
 # Web X Window Manager
 
 WebXWM (Web X Window Manager) is a full-featured tiling X window manager
-for Emacs built on top of [EXWM](https://github.com/ch11ng/exwm).
+for Midori built on top of [EXWM](https://github.com/ch11ng/exwm).
 It features:
 + Fully keyboard-driven operations
 + Hybrid layout modes (tiling & stacking)
