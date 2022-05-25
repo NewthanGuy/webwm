@@ -1,6 +1,6 @@
-# Emacs X Window Manager
+# Web X Window Manager
 
-EXWM (Emacs X Window Manager) is a full-featured tiling X window manager
+WebXWM (Web X Window Manager) is a full-featured tiling X window manager
 for Emacs built on top of [XELB](https://github.com/ch11ng/xelb).
 It features:
 + Fully keyboard-driven operations
@@ -17,5 +17,5 @@ to get an overview of what EXWM is capable of,
 and the [user guide](https://github.com/ch11ng/exwm/wiki)
 for a detailed explanation of its usage.
 
-**Note**: If you install EXWM from source, it's recommended to install
+**Note**: If you install WebXWM from source, it's recommended to install
 XELB also from source (otherwise install both from GNU ELPA).
